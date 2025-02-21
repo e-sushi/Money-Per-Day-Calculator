@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007BFF">
+    <title>Money Per Day Calculator</title>
+
+    <style>
+        /* Your existing styles */
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 1.25em;
+            padding: 1.25em;
+            background-color: #ffffff;
+            color: #000000;
+            max-width: 90vw;
+        }
+        input, button, p {
+            display: block;
+            font-size: 1em;
+            width: 100%;
+        }
+        input, button {
+            padding: 0.7em;
+            margin-bottom: 1em;
+            border: 1px solid #ccc;
+            border-radius: 0.3em;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            font-size: 2em;
+            font-weight: bold;
+            background-color: #ffffff;
+            color: #007BFF;
+            padding: 0.5em;
+            border-radius: 0.3em;
+            border: 1px solid #007BFF;
+            text-align: center;
+            margin-bottom: 0.5em;
+            margin-top: 0;
+        }
+        #daysLeftDisplay {
+            font-size: 1em;
+            margin-bottom: 1em;
+            display: flex;
+            justify-content: space-between;
+        }
+        #daysLeftDisplay span { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Money Per Day Calculator</h2>
+    <label for="resultLabel">Max Money Per Day:</label>
+    <p id="result">?</p>
+    <label for="money">Money Available:</label>
+    <input type="number" id="money" placeholder="Enter amount" step="0.01">
+    <label for="startDate">Select Start Date:</label>
+    <input type="date" id="startDate">
+    <label for="endDate">Select End Date:</label>
+    <input type="date" id="endDate">
+    <p id="daysLeftDisplay"><span>Total Days:</span> <span id="daysLeftValue">?</span></p>
+    <button onclick="calculate()">Calculate</button>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed: ', error);
+                    });
+            });
+        }
+        function setDefaultDates() {
+            let today = new Date();
+            let lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            let todayStr = formatDate(today);
+            let lastDayStr = formatDate(lastDay);
+            document.getElementById("startDate").value = todayStr;
+            document.getElementById("endDate").value = lastDayStr;
+            updateDaysLeft();
+        }
+        function formatDate(date) {
+            let year = date.getFullYear();
+            let month = String(date.getMonth() + 1).padStart(2, '0');
+            let day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        function updateDaysLeft() {
+            let startDate = new Date(document.getElementById("startDate").value);
+            let endDate = new Date(document.getElementById("endDate").value);
+            
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate > endDate) {
+                document.getElementById("daysLeftValue").innerText = "?";
+                document.getElementById("result").innerText = "?";
+                return;
+            }
+            let daysLeft = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById("daysLeftValue").innerText = daysLeft;
+            document.getElementById("result").innerText = "?";
+        }
+        function calculate() {
+            let moneyAvailable = parseFloat(document.getElementById("money").value);
+            let daysLeft = parseInt(document.getElementById("daysLeftValue").innerText, 10);
+            if (isNaN(moneyAvailable) || moneyAvailable <= 0 || isNaN(daysLeft) || daysLeft <= 0) {
+                document.getElementById("result").innerText = "?";
+                return;
+            }
+            let moneyPerDay = (moneyAvailable / daysLeft).toFixed(2);
+            document.getElementById("result").innerText = moneyPerDay;
+        }
+        document.addEventListener("DOMContentLoaded", setDefaultDates);
+        document.getElementById("startDate").addEventListener("change", updateDaysLeft);
+        document.getElementById("endDate").addEventListener("change", updateDaysLeft);
+        document.getElementById("money").addEventListener("input", calculate);
+    </script>
+</body>
+</html>
